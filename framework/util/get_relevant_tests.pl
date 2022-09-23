@@ -62,7 +62,6 @@ Determines the set of relevant tests for each bug (or a particular bug) of a
 given project. The script stops as soon as an error occurs for any project version.
 
 =cut
-
 use warnings;
 use strict;
 

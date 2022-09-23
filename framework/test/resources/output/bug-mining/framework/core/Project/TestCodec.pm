@@ -115,8 +115,7 @@ sub initialize_revision {
 # Existing Ant build.xml and default.properties
 #
 sub _ant_layout {
-    @_ == 1 or die $ARG_ERROR;
-    my ($dir) = @_;
+    my $dir = shift;
     my $src  = `grep "source.home" $dir/default.properties 2>/dev/null`;
     my $test = `grep "test.home" $dir/default.properties 2>/dev/null`;
 
@@ -133,8 +132,7 @@ sub _ant_layout {
 # Generated build.xml (from mvn ant:ant) with maven-build.properties
 #
 sub _maven_layout {
-    @_ == 1 or die $ARG_ERROR;
-    my ($dir) = @_;
+    my $dir = shift;
     my $src  = `grep "maven.build.srcDir.0" $dir/maven-build.properties 2>/dev/null`;
     my $test = `grep "maven.build.testDir.0" $dir/maven-build.properties 2>/dev/null`;
 

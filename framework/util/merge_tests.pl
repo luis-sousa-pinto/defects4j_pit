@@ -63,19 +63,15 @@ my $test_name= shift @ARGV;
 =pod
 
 The log file may contain arbitrary lines -- the script only considers lines that
-match the pattern: B<C</--- ([^:]*)(::(.*))?/>>.
+match the pattern: B</--- ([^:]*)(::(.*))?/>.
 
-=head2 Example entries in the log file
+=head3 Example entries in the log file
 
-=over 4
+=over
 
-=item *
+=item Failing test class: --- package.Class
 
-Failing test class: C<--- package.Class>
-
-=item *
-
-Failing test method: C<--- package.Class::method>
+=item Failing test method: --- package.Class::method
 
 =back
 
@@ -83,7 +79,6 @@ All lines matching the pattern are sorted, such that a failing test class in the
 list will appear before any of its failing methods.
 
 =cut
-
 my @list = `grep "^---" $log_file | sort -u -k1 -t":"`;
 
 my @tests;

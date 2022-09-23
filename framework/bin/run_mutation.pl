@@ -105,7 +105,6 @@ F<out_dir/L<TAB_MUTATION|DB>>. The corresponding log files are stored in
 F<out_dir/L<TAB_MUTATION|DB>_log>.
 
 =cut
-
 use warnings;
 use strict;
 
@@ -143,10 +142,6 @@ my $EXCL = $cmd_opts{e};
 my $MUT_OPS_FILE = $cmd_opts{m};
 # Enable debugging if flag is set
 $DEBUG = 1 if defined $cmd_opts{D};
-
-if ($DEBUG) {
-  Utils::print_env();
-}
 
 # The mutation operators that should be enabled
 my @MUT_OPS = ("AOR", "LOR","SOR", "COR", "ROR", "ORU", "LVR", "STD");
@@ -192,7 +187,6 @@ each executed test suite are copied to:
 F<out_dir/L<TAB_MUTATION|DB>_log/project_id>.
 
 =cut
-
 # Log directory and file
 my $LOG_DIR = "$OUT_DIR/${TAB_MUTATION}_log/$PID";
 my $LOG_FILE = "$LOG_DIR/" . basename($0) . ".log";

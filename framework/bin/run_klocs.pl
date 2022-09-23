@@ -69,7 +69,6 @@ This script prepares a particular program version as if it was going to run Rand
 It then counts the program KLOCS to use later in calculating Randoop test coverage.
 
 =cut
-
 use strict;
 use warnings;
 
@@ -109,11 +108,7 @@ $TID =~ /^\d+$/ or die "Wrong test_id format (\\d+): $TID!";
 my $OUT_DIR = $cmd_opts{o};
 
 # Enable debugging if flag is set
-$DEBUG = 1 if defined $cmd_opts{D};
-
-if ($DEBUG) {
-  Utils::print_env();
-}
+#$DEBUG = 1 if defined $cmd_opts{D};
 
 # List of loaded classes
 my $LOADED_CLASSES = "$SCRIPT_DIR/projects/$PID/loaded_classes/$BID.src";

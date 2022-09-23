@@ -62,7 +62,6 @@ list of classes that should be mutated.
 The generated MML file is named F<C<bug_id>.mml> and written to F<out_dir>.
 
 =cut
-
 use warnings;
 use strict;
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Exit the shell script immediately if any of the subsequent commands fails.
+# Any subsequent command which fail will cause the shell script to exit
 # immediately
 set -e
 #
@@ -11,39 +11,24 @@ set -e
 # - the supported test generation tools
 # - the supported code coverage tools (TODO)
 ################################################################################
-
-# Print an error message and terminate the script.
-# Takes one argument, a custom error message.
-# Prints the supplied error message and a script termination notice to stderr.
-# Terminates the script with exit code 1.
-print_error_and_exit() {
-  echo -e "${1} \nTerminating initialization... " >&2
-  exit 1
-}
-
 # TODO: Major and the coverage tools should be moved to framework/lib
 
-# Check whether wget is available on OSX
+# Check whether curl is available
 if [ "$(uname)" = "Darwin" ] ; then
     if ! wget --version > /dev/null 2>&1; then
-        print_error_and_exit "Couldn't find wget to download dependencies. Please install wget and re-run this script."
+        echo "Couldn't find wget to download dependencies. Please install wget and re-run this script."
+        exit 1
     fi
 fi
-
-# Check whether curl is available
 if ! curl --version > /dev/null 2>&1; then
-    print_error_and_exit "Couldn't find curl to download dependencies. Please install curl and re-run this script."
+    echo "Couldn't find curl to download dependencies. Please install curl and re-run this script."
+    exit 1
 fi
 
-# Check whether unzip is available
-if ! unzip -v > /dev/null 2>&1; then
-    print_error_and_exit "Couldn't find unzip to extract dependencies. Please install unzip and re-run this script."
-fi
-################################################################################
 HOST_URL="https://defects4j.org/downloads"
 
 # Directories for project repositories and external libraries
-BASE="$(cd "$(dirname "$0")"; pwd)"
+BASE="$(cd $(dirname $0); pwd)"
 DIR_REPOS="$BASE/project_repos"
 DIR_LIB_GEN="$BASE/framework/lib/test_generation/generation"
 DIR_LIB_RT="$BASE/framework/lib/test_generation/runtime"
@@ -60,54 +45,31 @@ if [ "$(uname)" = "Darwin" ] ; then
   function timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
 fi
 
-# Download the remote resource to a local file of the same name.
-# Takes a single argument, a URL.
-# Skips the download if the remote resource is newer.
-# Works around connections that hang.
+# Download the remote resource to a local file of the same name, if the
+# remote resource is newer.  Works around connections that hang.  Takes a
+# single command-line argument, a URL.
 download_url() {
-    if [ "$#" -ne 1 ]; then
-        echo "Illegal number of arguments"
-    fi
-    URL=$1
-    echo "Downloading ${URL}"
+    echo "Downloading $@"
     if [ "$(uname)" = "Darwin" ] ; then
-        wget -nv -N "$URL" || print_error_and_exit "Could not download $URL"
-        echo "Downloaded $URL"
+        wget -nv -N "$@"
     else
-        BASENAME="$(basename "$URL")"
-        if [ -f "$BASENAME" ]; then
-            ZBASENAME="-z $BASENAME"
-        else
-            ZBASENAME=""
-        fi
-        (timeout 300 curl -s -S -R -L -O $ZBASENAME "$URL" || (echo "retrying curl $URL" && rm -f "$BASENAME" && curl -R -L -O "$URL")) && echo "Downloaded $URL"
+	BASENAME=`basename ${@: -1}`
+	if [ -f $BASENAME ]; then
+	    ZBASENAME="-z $BASENAME"
+	else
+	    ZBASENAME=""
+	fi
+	timeout 300 curl -s -S -R -L -O $ZBASENAME "$@" || (echo "retrying curl $@" && rm -f "$BASENAME" && curl -R -L -O "$@")
     fi
-}
-
-# Download the remote resource and unzip it.
-# Takes a single argument, a URL.
-# Skips the download if the local file of the same name is newer.
-# Works around connections that hang and corrupted downloads.
-download_url_and_unzip() {
-    if [ "$#" -ne 1 ]; then
-        echo "Illegal number of arguments"
-    fi
-    URL=$1
-    BASENAME="$(basename "$URL")"
-    download_url "$URL"
-    if ! unzip -o "$BASENAME" > /dev/null ; then
-        echo "retrying download and unzip"
-        rm -rf "$BASENAME"
-        download_url "$URL"
-        unzip -o "$BASENAME"
-    fi
+    echo "Downloaded $@"
 }
 
 # Get time of last data modification of a file
 get_modification_timestamp() {
     local USAGE="Usage: get_modification_timestamp <file>"
     if [ "$#" != 1 ]; then
-        print_error_and_exit "$USAGE"
+        echo "$USAGE" >&2
+        exit 1
     fi
 
     local f="$1"
@@ -141,7 +103,8 @@ echo "Setting up Major ... "
 MAJOR_VERSION="1.3.4"
 MAJOR_URL="https://mutation-testing.org/downloads"
 MAJOR_ZIP="major-${MAJOR_VERSION}_jre7.zip"
-cd "$BASE" && download_url_and_unzip "$MAJOR_URL/$MAJOR_ZIP" \
+cd "$BASE" && download_url "$MAJOR_URL/$MAJOR_ZIP" \
+           && unzip -o "$MAJOR_ZIP" > /dev/null \
            && rm "$MAJOR_ZIP" \
            && cp major/bin/.ant major/bin/ant
 
@@ -151,7 +114,7 @@ cd "$BASE" && download_url_and_unzip "$MAJOR_URL/$MAJOR_ZIP" \
 #
 echo
 echo "Setting up EvoSuite ... "
-EVOSUITE_VERSION="1.1.0"
+EVOSUITE_VERSION="1.0.6"
 EVOSUITE_URL="https://github.com/EvoSuite/evosuite/releases/download/v${EVOSUITE_VERSION}"
 EVOSUITE_JAR="evosuite-${EVOSUITE_VERSION}.jar"
 EVOSUITE_RT_JAR="evosuite-standalone-runtime-${EVOSUITE_VERSION}.jar"
@@ -167,13 +130,14 @@ cd "$DIR_LIB_RT"  && download_url "$EVOSUITE_URL/$EVOSUITE_RT_JAR"
 #
 echo
 echo "Setting up Randoop ... "
-RANDOOP_VERSION="4.2.5"
+RANDOOP_VERSION="4.2.2"
 RANDOOP_URL="https://github.com/randoop/randoop/releases/download/v${RANDOOP_VERSION}"
 RANDOOP_ZIP="randoop-${RANDOOP_VERSION}.zip"
 RANDOOP_JAR="randoop-all-${RANDOOP_VERSION}.jar"
 REPLACECALL_JAR="replacecall-${RANDOOP_VERSION}.jar"
 COVEREDCLASS_JAR="covered-class-${RANDOOP_VERSION}.jar"
-(cd "$DIR_LIB_GEN" && download_url_and_unzip "$RANDOOP_URL/$RANDOOP_ZIP")
+(cd "$DIR_LIB_GEN" && download_url "$RANDOOP_URL/$RANDOOP_ZIP" \
+                   && unzip -q $RANDOOP_ZIP)
 # Set symlink for the supported version of Randoop
 (cd "$DIR_LIB_GEN" && ln -sf "randoop-${RANDOOP_VERSION}/$RANDOOP_JAR" "randoop-current.jar")
 (cd "$DIR_LIB_GEN" && ln -sf "randoop-${RANDOOP_VERSION}/$REPLACECALL_JAR" "replacecall-current.jar")

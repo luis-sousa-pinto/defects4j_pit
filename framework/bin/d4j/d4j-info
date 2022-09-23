@@ -26,6 +26,7 @@
 
 d4j-info -- print information for a specific project or bug
 
+
 =head1 SYNOPSIS
 
   d4j-info -p project_id [-b bug_id]
@@ -50,7 +51,6 @@ The id of the bug for which the information shall be printed. Format: C<\d+>.
 =back
 
 =cut
-
 use warnings;
 use strict;
 

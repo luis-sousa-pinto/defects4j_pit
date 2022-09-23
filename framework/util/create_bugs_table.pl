@@ -37,7 +37,6 @@ create_bugs_table.pl -- populate bugs table with id, name, and number of bugs pe
 Determines all active and deprecated bugs ids and outputs a table in Markdown format.
 
 =cut
-
 use warnings;
 use strict;
 

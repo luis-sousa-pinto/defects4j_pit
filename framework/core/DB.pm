@@ -33,7 +33,6 @@ Every property is initialized with a default value, which can be overriden by
 setting the corresponding environment variable.
 
 =cut
-
 package DB;
 
 use warnings;
@@ -57,7 +56,6 @@ our @ISA = qw(Exporter);
 The directory of the database storing all results (I<L<BASE_DIR|Constants>/result_db>)
 
 =cut
-
 our $DB_DIR = ($ENV{DB_DIR} or "$BASE_DIR/result_db");
 
 =pod
@@ -67,7 +65,6 @@ our $DB_DIR = ($ENV{DB_DIR} or "$BASE_DIR/result_db");
 The name of the database table for the results of analyzing all revision pairs (I<rev_pairs>)
 
 =cut
-
 our $TAB_REV_PAIRS = ($ENV{TAB_REV_PAIRS} or "rev_pairs");
 
 =pod
@@ -77,7 +74,6 @@ our $TAB_REV_PAIRS = ($ENV{TAB_REV_PAIRS} or "rev_pairs");
 The name of the database table for the results of analyzing triggering tests (I<trigger>)
 
 =cut
-
 our $TAB_TRIGGER = ($ENV{TAB_TRIGGER} or "trigger");
 
 =pod
@@ -87,7 +83,6 @@ our $TAB_TRIGGER = ($ENV{TAB_TRIGGER} or "trigger");
 The name of the database table for the results of running bug detection analysis (I<bug_detection>)
 
 =cut
-
 our $TAB_BUG_DETECTION = ($ENV{TAB_BUG_DETECTION} or "bug_detection");
 
 
@@ -98,7 +93,6 @@ our $TAB_BUG_DETECTION = ($ENV{TAB_BUG_DETECTION} or "bug_detection");
 The name of the database table for the results of running mutation analysis (I<mutation>)
 
 =cut
-
 our $TAB_MUTATION = ($ENV{TAB_MUTATION} or "mutation");
 
 =pod
@@ -108,7 +102,6 @@ our $TAB_MUTATION = ($ENV{TAB_MUTATION} or "mutation");
 The name of the database table for the results of running coverage analysis (I<coverage>)
 
 =cut
-
 our $TAB_COVERAGE = ($ENV{TAB_COVERAGE} or "coverage");
 
 =pod
@@ -118,7 +111,6 @@ our $TAB_COVERAGE = ($ENV{TAB_COVERAGE} or "coverage");
 The name of the database table for the results of running code evolution analysis (I<code_evolution>)
 
 =cut
-
 our $TAB_CODE_EVOLUTION = ($ENV{TAB_CODE_EVOLUTION} or "code_evolution");
 
 =pod
@@ -128,7 +120,6 @@ our $TAB_CODE_EVOLUTION = ($ENV{TAB_CODE_EVOLUTION} or "code_evolution");
 The name of the database table for the results of patch review (I<review>)
 
 =cut
-
 our $TAB_REVIEW = ($ENV{TAB_REVIEW} or "review");
 
 =pod
@@ -140,7 +131,6 @@ our $TAB_REVIEW = ($ENV{TAB_REVIEW} or "review");
 The name of the database table for the results of fixing automatically generated test cases (I<fix>)
 
 =cut
-
 our $TAB_FIX = ($ENV{TAB_FIX} or "fix");
 
 # Common columns for all tables
@@ -285,11 +275,9 @@ Connect to database and return database handle -- this subroutine will initializ
 the database and the requested C<table> if necessary.
 
 =cut
-
 sub get_db_handle {
-    @_ >= 1 or die $ARG_ERROR;
-    my ($table, $db_dir) = @_;
-    $db_dir //= $DB_DIR;
+    my $table = shift @_ // die $ARG_ERROR;
+    my $db_dir = shift @_ // $DB_DIR;
     my $dbh;
 
     defined $tables{$table} or die "Unknown table: $table!";
@@ -321,9 +309,7 @@ sub get_db_handle {
 Returns a list of column names for C<table> or C<undef> if this table does not exist.
 
 =cut
-
 sub get_tab_columns {
-    @_ == 1 or die $ARG_ERROR;
-    my ($table) = @_;
+    my $table = shift;
     return @{$tables{$table}};
 }
